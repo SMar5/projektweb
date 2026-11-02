@@ -32,7 +32,7 @@ ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 CSRF_TRUSTED_ORIGINS = [h for h in os.getenv("CSRF_TRUSTED_HOSTS", "").split(",") if h]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUB
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Application definition
 
@@ -149,6 +149,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 if os.getenv("AWS_STORAGE_BUCKET_NAME"):
