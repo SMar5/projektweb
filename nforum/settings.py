@@ -92,14 +92,11 @@ WSGI_APPLICATION = 'nforum.wsgi.application'
 DATABASES = {
     'default': {
         'NAME': os.getenv("DATABASE_NAME"),
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'USER': os.getenv("DATABASE_USER"),
         'PASSWORD': os.getenv("DATABASE_PASSWORD"),
         'HOST': os.getenv("DATABASE_HOST"),
         'PORT': os.getenv("DATABASE_PORT"),
-        'OPTIONS': {
-            'autocommit': True,
-        },
     }
 }
 
