@@ -1,7 +1,7 @@
 # NForum
 NForum is a simple light-weight forum written in Python using Django. It allows users to create their own threads
 or talk in already existing ones. It has a built-in upvote/downvote (reputation) system, achievements, alerts & more!
-
+-
 > :warning: The project is still under heavy development and should not be used in production in it's current state.
 
 ## Features
