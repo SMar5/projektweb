@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from app.forum.models import Message, Thread
+from forum.models import Message, Thread
 
 
 class UserProfile(models.Model):

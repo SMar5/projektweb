@@ -1,6 +1,6 @@
 from django import forms
 
-from app.wiki.models import WikiPage
+from wiki.models import WikiPage
 
 
 class PageAddForm(forms.ModelForm):

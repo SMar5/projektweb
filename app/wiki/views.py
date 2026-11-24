@@ -3,8 +3,8 @@ from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from app.nforum.errors import *
-from app.wiki.forms import PageAddForm, PageChangeForm, PageDeleteForm
+from nforum.errors import *
+from wiki.forms import PageAddForm, PageChangeForm, PageDeleteForm
 from .models import WikiPage
 
 

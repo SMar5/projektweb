@@ -1,7 +1,7 @@
 from django import template
 from django.template.defaultfilters import safe
 
-from app.settings.models import SiteColorPalette
+from settings.models import SiteColorPalette
 
 register = template.Library()
 

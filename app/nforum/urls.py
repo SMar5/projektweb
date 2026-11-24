@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
-from app.forum import views as f_views
+from forum import views as f_views
 
 admin.site.site_header = "NForum"
 admin.site.site_title = "Welcome to the Control Panel."
