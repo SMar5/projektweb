@@ -7,7 +7,7 @@ import os
 import sys
 import boto3
 PREFIX = os.environ.get("SSM_PREFIX", "/nforum/prod/")
-REGION = os.environ.get("AWS_REGION", "eu-central-1")
+REGION = os.environ.get("AWS_REGION", "eu-north-1")
 def load():
     ssm = boto3.client("ssm", region_name=REGION)
     pages = ssm.get_paginator("get_parameters_by_path").paginate(
