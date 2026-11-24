@@ -1,7 +1,7 @@
 from django import forms
 from tinymce import TinyMCE
 
-from app.forum.models import ThreadPrefix
+from forum.models import ThreadPrefix
 
 
 class CreateThreadForm(forms.Form):

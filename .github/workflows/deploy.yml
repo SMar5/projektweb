@@ -1,0 +1,110 @@
+name: Deploy
+on:
+  push:
+    branches: [production]
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nforum
+        ports: ["5432:5432"]
+        options: >
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SECRET_KEY: ci-only-not-a-secret
+      DEBUG: "False"
+      DATABASE_NAME: nforum
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: localhost
+      DATABASE_PORT: "5432"
+      DATABASE_SSLMODE: disable
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+          cache-dependency-path: app/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py migrate --noinput
+      - run: python manage.py test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      key: ${{ steps.pack.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Spakuj paczke
+        id: pack
+        run: |
+          mkdir dist
+          zip -r "dist/nforum-${GITHUB_SHA}.zip" appspec.yml deploy app \
+            -x "*/__pycache__/*" "*.pyc"
+          echo "key=releases/nforum-${GITHUB_SHA}.zip" >> "$GITHUB_OUTPUT"
+      - name: AWS - rola build
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_BUILD_ARN }}
+          role-external-id: ${{ secrets.AWS_EXTERNAL_ID_BUILD }}
+          role-duration-seconds: 900
+      - name: Upload do S3
+        run: |
+          aws s3 cp "dist/nforum-${GITHUB_SHA}.zip" \
+            "s3://${{ secrets.S3_BUCKET }}/${{ steps.pack.outputs.key }}"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: AWS - rola deploy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_DEPLOY_ARN }}
+          role-external-id: ${{ secrets.AWS_EXTERNAL_ID_DEPLOY }}
+          role-duration-seconds: 3600
+      - name: Utworz deployment w CodeDeploy
+        id: dep
+        env:
+          BUCKET: ${{ secrets.S3_BUCKET }}
+          KEY: ${{ needs.build.outputs.key }}
+        run: |
+          ID=$(aws deploy create-deployment \
+            --application-name "${{ vars.CD_APPLICATION }}" \
+            --deployment-group-name "${{ vars.CD_GROUP }}" \
+            --s3-location "bucket=${BUCKET},key=${KEY},bundleType=zip" \
+            --description "GitHub ${GITHUB_SHA}" \
+            --query deploymentId --output text)
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "Deployment: $ID"
+      - name: Czekaj na wynik
+        run: aws deploy wait deployment-successful --deployment-id "${{ steps.dep.outputs.id }}"
+      - name: Szczegoly bledu (tylko przy porazce)
+        if: failure()
+        run: |
+          aws deploy get-deployment --deployment-id "${{ steps.dep.outputs.id }}" \
+            --query "deploymentInfo.errorInformation" --output json

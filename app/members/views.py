@@ -5,8 +5,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
-from app.forum.models import Message, Thread
-from app.nforum.errors import unknown_user, already_authenticated
+from forum.models import Message, Thread
+from nforum.errors import unknown_user, already_authenticated
 from .forms import LoginForm, SignupForm, SettingsForm
 from .models import UserProfile
 

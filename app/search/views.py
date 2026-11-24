@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render
 
-from app.forum.models import Thread, Message
-from app.nforum.errors import search_failed
+from forum.models import Thread, Message
+from nforum.errors import search_failed
 
 
 def search_view(request):
