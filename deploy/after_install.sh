@@ -21,7 +21,7 @@ Group=nforum
 WorkingDirectory=$APP/app
 ExecStart=$PY $APP/deploy/with_env.py $VENV/bin/gunicorn nforum.wsgi:application \\
   --bind 0.0.0.0:8000 --workers 3 --timeout 30 \\
-  --access-logfile - --error-logfile
+  --access-logfile - --error-logfile -
 Restart=on-failure
 RestartSec=3
 [Install]
