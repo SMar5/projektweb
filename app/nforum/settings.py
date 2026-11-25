@@ -158,5 +158,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 if os.getenv("AWS_STORAGE_BUCKET_NAME"):
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "eu-central-1")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "eu-north-1")
     AWS_QUERYSTRING_AUTH = True      # private bucket, signed URLs
